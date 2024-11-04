@@ -9,7 +9,7 @@ import EmptyState from '@/components/EmptyState';
 import { useState } from "react";
 import { getAllPosts } from '@/lib/appwrite';
 import useAppwrite  from '@/lib/useAppwrite';
-import ParcelCard from '@/components/VideoCard';
+import ParcelCard from '@/components/ParcelCard';
 const Home = () => {
   const { data: posts, refetch} = useAppwrite(getAllPosts);
   
