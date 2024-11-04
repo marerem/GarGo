@@ -1,42 +1,39 @@
+/* Import installed modules */
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
+import { View, Text, ScrollView, Alert, Image } from "react-native";
 
-import { images } from "../../constants";
-import CustumButton from '../../components/CustumButton';
+/* Import custom modules */
+import { images } from "@/constants";
+import CustumButton from '@/components/CustomButton';
 import FormField from '@/components/FormField'
-import { createUser } from "../../lib/appwrite";
-import { useGlobalContext } from "../../context/GlobalProvider";
+import Auth from "@/lib/backend/auth";
 
-
-const SignUp = () => {
-  const { setUser, setIsLoggedIn } = useGlobalContext();
-  const [isSubmitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
+/* Define and export the component */
+export default function SignUp() {
+  /* Define the submit function */
   const submit = async () => {
     if (form.username === "" || form.email === "" || form.password === "") {
       Alert.alert("Error", "Please fill in all fields");
+      return;
     }
 
     setSubmitting(true);
     try {
-      const result = await createUser(form.email, form.password, form.username);
-      setUser(result);
-      setIsLoggedIn(true);
-
-      router.replace("/home");
+      await Auth.register(form.username, form.email, form.password);
+      router.replace("/");
     } catch (error) {
-      Alert.alert("Error", error.message);
-    } finally {
+      Alert.alert("Error", (error as Error).message);
       setSubmitting(false);
     }
   };
 
+  /* Define the state variables */
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ username: "", email: "", password: "",});
+
+  /* Return the component template */
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
@@ -55,23 +52,29 @@ const SignUp = () => {
           <FormField
             title="Username"
             value={form.username}
+            type="text"
+            placeholder="Enter your username"
             handleChangeText={(e) => setForm({ ...form, username: e })}
-            otherStyles="mt-10"
+            viewAdditionalStyle="mt-10"
           />
 
           <FormField
             title="Email"
             value={form.email}
+            type="email"
+            placeholder="Enter your email"
             handleChangeText={(e) => setForm({ ...form, email: e })}
-            otherStyles="mt-7"
+            viewAdditionalStyle="mt-7"
             keyboardType="email-address"
           />
 
           <FormField
             title="Password"
             value={form.password}
+            type="password"
+            placeholder="Enter your password"
             handleChangeText={(e) => setForm({ ...form, password: e })}
-            otherStyles="mt-7"
+            viewAdditionalStyle="mt-7"
           />
 
           <CustumButton
@@ -82,19 +85,11 @@ const SignUp = () => {
           />
 
           <View className="flex justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
-              Have an account already?
-            </Text>
-            <Link
-              href="/sign_in"
-              className="text-lg font-psemibold text-secondary"
-            >
-              Sign in
-            </Link>
+            <Text className="text-lg text-gray-100 font-pregular">Have an account already?</Text>
+            <Link href="./sign_in" className="text-lg font-psemibold text-secondary">Sign in</Link>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-export default SignUp

@@ -1,14 +1,12 @@
-import { StyleSheet, Text, View } from 'react-native'
+/* Import installed modules */
+import { Text, View } from 'react-native'
 import React from 'react'
 
-const Maps = () => {
+/* Define and export the component */
+export default function Home() {
   return (
-    <View>
-      <Text>Maps</Text>
+    <View className="flex justify-center items-center h-full">
+      <Text>Map</Text>
     </View>
   )
 }
-
-export default Maps
-
-const styles = StyleSheet.create({})

@@ -1,75 +1,27 @@
-import { StyleSheet, FlatList, Text, View, Image, RefreshControl, Alert } from 'react-native'
+/* Import installed modules */
+import { Text, View, TouchableOpacity } from 'react-native'
 import React from 'react'
-import { useEffect } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { images } from "../../constants";
-import SearchInput from "../../components/SearchInput";
-import History from '@/components/History';
-import EmptyState from '@/components/EmptyState';
-import { useState } from "react";
-import { getAllPosts } from '@/lib/appwrite';
-import useAppwrite  from '@/lib/useAppwrite';
-import ParcelCard from '@/components/VideoCard';
-const Home = () => {
-  const { data: posts, refetch} = useAppwrite(getAllPosts);
-  
+import { router } from 'expo-router';
 
-  const [refreshing, setRefreshing] = useState(false);
+/* Import custom modules */
+import Auth from "@/lib/backend/auth";
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  };
+/* Define and export the component */
+export default function Home() {
+  const logout = async () => {
+    /* Implement the logout logic */
+    await Auth.logout()
+
+    /* Redirect the user to the sign in page */
+    router.replace("/")
+  }
 
   return (
-
-    <SafeAreaView className="bg-primary h-full">
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => item.$id}
-        renderItem={({item}) => (
-          //<Text className="text-3xl text-white">{item.title}</Text>
-          <ParcelCard video={item}/>
-        )}
-        ListHeaderComponent={() => (
-          <View  className="my-6 px4 space-y-6">
-            <View className="flex justify-between items-start flex-row mb-6">
-              <View>
-                <Text className="font-pmedium text-sm text-gray-100 px-6">Welcome  Back</Text>
-                <Text className="text-2xl font-psemibold text-white px-6">John Doe</Text>
-              </View>
-              <View className="mt-1.8">
-                <Image
-                  source={images.shortlogo}
-                  className="w-24 h-10"
-                  resizeMode="contain"
-                />
-              </View>
-             </View>
-             <SearchInput initialQuery="Search by name or ID" />
-             <View className="w-full flex-1 pt-5 pb-8">
-              <Text className="text-lg font-pregular text-gray-100 mb-3">
-                All history is here
-              </Text>
-              <History posts={[{id : 1},{id : 2},{id : 3}] ?? []}/>
-              </View>
-          </View>
-        )}
-        ListEmptyComponent={() => (
-        <EmptyState
-        title="No history found"
-        subtitle="Explore the app, take your first delivery or send a package"
-        />
-        )}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      />
-    </SafeAreaView>
+    <View className="flex justify-center items-center h-full">
+      <Text className="text-2xl">Welcome to CarGo relay</Text>
+      <TouchableOpacity onPress={logout} className="mt-5 bg-blue-500 p-4 rounded-md">
+        <Text className="text-white">Logout</Text>
+      </TouchableOpacity>
+    </View>
   )
 }
-
-export default Home
-
-const styles = StyleSheet.create({})

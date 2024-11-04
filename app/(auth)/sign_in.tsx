@@ -1,44 +1,43 @@
+/* Import installed modules */
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
 
-import { images } from "../../constants";
+/* Import custom modules */
+import { images } from "@/constants";
 import FormField from '@/components/FormField'
-import CustomButton from "@/components/CustumButton";
-import { getCurrentUser, signIn } from "../../lib/appwrite";
-import { useGlobalContext } from "../../context/GlobalProvider";
+import CustomButton from "@/components/CustomButton";
+import Auth from "@/lib/backend/auth";
 
-const SignIn = () => {
-  const { setUser, setIsLogged } = useGlobalContext();
-  const [isSubmitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
+/* Define and export the component */
+export default function SignIn() {
+  /* Define the submit function */
   const submit = async () => {
+    /* Check the input values */
     if (form.email === "" || form.password === "") {
       Alert.alert("Error", "Please fill in all fields");
+      return;
     }
 
+    /* Set the loading state */
     setSubmitting(true);
-
+    
+    /* Implement the sign in logic */
     try {
-      await signIn(form.email, form.password);
-      const result = await getCurrentUser();
-      setUser(result);
-      setIsLogged(true);
-
-      Alert.alert("Success", "User signed in successfully");
-      router.replace("/home");
+      await Auth.pswauth(form.email, form.password);
+      router.replace("/");
     } catch (error) {
-      Alert.alert("Error", error.message);
-    } finally {
+      Alert.alert("Error", (error as Error).message);
       setSubmitting(false);
     }
   };
 
+  /* Define the form states */
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "" });
+
+  /* Return the JSX */
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
@@ -60,16 +59,20 @@ const SignIn = () => {
           <FormField
             title="Email"
             value={form.email}
+            type="email"
+            placeholder="Enter your email"
             handleChangeText={(e) => setForm({ ...form, email: e })}
-            otherStyles="mt-7"
+            viewAdditionalStyle="mt-7"
             keyboardType="email-address"
           />
 
           <FormField
             title="Password"
             value={form.password}
+            type="password"
+            placeholder="Enter your password"
             handleChangeText={(e) => setForm({ ...form, password: e })}
-            otherStyles="mt-7"
+            viewAdditionalStyle="mt-7"
           />
 
           <CustomButton
@@ -80,20 +83,11 @@ const SignIn = () => {
           />
 
           <View className="flex justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
-              Don't have an account?
-            </Text>
-            <Link
-              href="/sign_up"
-              className="text-lg font-psemibold text-secondary"
-            >
-              Signup
-            </Link>
+            <Text className="text-lg text-gray-100 font-pregular">Don't have an account?</Text>
+            <Link href="./sign_up" className="text-lg font-psemibold text-secondary">Signup</Link>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-export default SignIn;

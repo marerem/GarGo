@@ -1,12 +1,20 @@
+/* Import installed modules */
 import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
 
-const CustomButton = ({
+/* Define and export the component */
+export default function CustomButton({
   title,
   handlePress,
   containerStyles,
   textStyles,
-  isLoading,
-}) => {
+  isLoading = false,
+} : {
+  title: string,
+  handlePress: () => void,
+  containerStyles?: string,
+  textStyles?: string,
+  isLoading?: boolean
+}) {
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -16,20 +24,9 @@ const CustomButton = ({
       }`}
       disabled={isLoading}
     >
-      <Text className={`text-primary font-psemibold text-lg ${textStyles}`}>
-        {title}
-      </Text>
+      <Text className={`text-primary font-psemibold text-lg ${textStyles}`}>{title}</Text>
 
-      {isLoading && (
-        <ActivityIndicator
-          animating={isLoading}
-          color="#fff"
-          size="small"
-          className="ml-2"
-        />
-      )}
+      {isLoading && ( <ActivityIndicator color="#fff" size="small" className="ml-2"/> )}
     </TouchableOpacity>
   );
 };
-
-export default CustomButton;

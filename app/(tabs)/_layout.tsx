@@ -1,25 +1,29 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
+/* Import installed modules */
+import { Text, View, Image, ImageSourcePropType } from 'react-native'
 import React from 'react'
-import { Tabs, Redirect } from 'expo-router'
-import {icons} from '../../constants'
+import { Tabs } from 'expo-router'
 
-const TabIcon = ({icon, color, name, focused}) => {
+/* Import custom modules */
+import {icons} from '@/constants'
+
+/* Define the tab Icon element */
+const TabIcon = ({icon, color, name, focused} : {icon: ImageSourcePropType, color: string, name: string, focused: boolean}) => {
   return (
     <View className='items-center justify-center'>
       <Image source={icon}
-      resizeMode='contain'
-      tintColor={color}
-      className="w-6 h-6"
+        resizeMode='contain'
+        tintColor={color}
+        className="w-6 h-6"
       />
-      <Text className={`${focused ? 'font-psemibold' :
-       'font-pregular'} text-xs`} style = {{color:color}}>
+      <Text className={`${focused ? 'font-psemibold' : 'font-pregular'} text-xs`} style = {{color:color}}>
         {name}
       </Text>
     </View>
   )
 }
 
-const TabLayout = () => {
+/* Define and export the TabLayout component */
+export default function TabLayout() {
   return (
     <>
       <Tabs
@@ -31,10 +35,10 @@ const TabLayout = () => {
             backgroundColor: '#0f3d33' , //#161622 #0f1f12
             borderTopWidth: 1,
             borderTopColor: '#232533',
-            height: 95,
+            height: 70,
           }
-
         }}
+        initialRouteName="home"
       >
         <Tabs.Screen
         name="home"
@@ -79,24 +83,20 @@ const TabLayout = () => {
          }}
         />
           <Tabs.Screen
-        name="profile"
-        options={{ 
-        title: 'Profile',
-        headerShown: false,
-        tabBarIcon: ({color,focused}) => (
-          <TabIcon 
-            icon={icons.profile} 
-            color={color} 
-            name="Profile" 
-            focused={focused} />
-        )
-         }}
+          name="profile"
+          options={{ 
+          title: 'Profile',
+          headerShown: false,
+          tabBarIcon: ({color,focused}) => (
+            <TabIcon 
+              icon={icons.profile} 
+              color={color} 
+              name="Profile" 
+              focused={focused} />
+          )
+          }}
         />
       </Tabs>
     </>
   )
 }
-
-export default TabLayout
-
-const styles = StyleSheet.create({})

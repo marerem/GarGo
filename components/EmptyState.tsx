@@ -1,10 +1,12 @@
+/* Import installed modules */
 import { router } from "expo-router";
 import { View, Text, Image } from "react-native";
 
-import { images } from "../constants";
-import CustomButton from "./CustumButton";
+/* Import custom modules */
+import { images } from "@/constants";
+import CustomButton from "@/components/CustomButton";
 
-
+/* Define and export the component */
 const EmptyState = ({ title, subtitle }) => {
   return (
     <View className="flex justify-center items-center px-4">

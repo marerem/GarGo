@@ -1,20 +1,12 @@
-import { View, Image, Text } from 'react-native';
-import React from 'react';
-import { styled } from 'nativewind';  // Import NativeWind
+/* Import installed modules */
+import { Text, View } from 'react-native'
+import React from 'react'
 
-const Profile = () => {
+/* Define and export the component */
+export default function Home() {
   return (
-    <View className="flex-1 justify-center items-center bg-gray-100">
-      {/* GIF in the center */}
-      <Text className="text-2xl font-bold">Sorry, App coming soon</Text>
-      <Image
-        source={{ uri: 'https://www.devicers.com/wp-content/uploads/2022/02/02-treatment.gif' }}
-        className="w-full h-[46%]"  // Tailwind classes for size
-      />
+    <View className="flex justify-center items-center h-full">
+      <Text>Profile</Text>
     </View>
-  );
-};
-
-export default Profile;
-
-
+  )
+}

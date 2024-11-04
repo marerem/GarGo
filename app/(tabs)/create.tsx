@@ -1,14 +1,12 @@
-import { StyleSheet, Text, View } from 'react-native'
+/* Import installed modules */
+import { Text, View } from 'react-native'
 import React from 'react'
 
-const Create = () => {
+/* Define and export the component */
+export default function Home() {
   return (
-    <View>
+    <View className="flex justify-center items-center h-full">
       <Text>Create</Text>
     </View>
   )
 }
-
-export default Create
-
-const styles = StyleSheet.create({})
