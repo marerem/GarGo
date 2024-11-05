@@ -10,6 +10,7 @@ import TravelTimeScreen from '@/components/TravelTimeScreen';
 import TravelMethodScreen from '@/components/TravelMethodScreen';
 import SpaceAvailabilityScreen from '@/components/SpaceAvailabilityScreen';
 import ChooseOptionScreen from '@/components/ChooseOptionScreen';
+import SelectPackageScreen from '@/components/SelectPackageScreen'
 
 
 const Stack = createNativeStackNavigator();
@@ -71,6 +72,7 @@ export default function Maps() {
       <Stack.Screen name="TravelMethod" component={TravelMethodScreen} options={{ title: 'Travel Method' }} />
       <Stack.Screen name="SpaceAvailability" component={SpaceAvailabilityScreen} options={{ title: 'Space Availability' }} />
       <Stack.Screen name="ChooseOption" component={ChooseOptionScreen} options={{ title: 'Choose Option' }} />
+      <Stack.Screen name="SelectPackage" component={SelectPackageScreen} />
 
     </Stack.Navigator>
   );

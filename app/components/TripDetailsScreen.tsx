@@ -1,16 +1,21 @@
 // TripDetailsScreen.js
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, ActivityIndicator, TextInput, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { StyleSheet, View, Text, ScrollView, ActivityIndicator, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import { Icon } from 'react-native-elements';
-import { getAddressFromCoordinates } from '@/utils/locationUtils';
+import { getAddressFromCoordinates } from '@/utils/locationUtils'; // Your utility function
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 
 function TripDetailsScreen({ route }) {
   const navigation = useNavigation();
   const { location, destination, setDestination } = route.params;
   const [address, setAddress] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [localDestination, setLocalDestination] = useState(destination); // Local state for TextInput
+  const [localStartPoint, setLocalStartPoint] = useState(''); // New state for starting point
+  const [localDestination, setLocalDestination] = useState(destination);
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [lastQuery, setLastQuery] = useState(''); // Track last query
 
   useEffect(() => {
     if (location) {
@@ -18,20 +23,90 @@ function TripDetailsScreen({ route }) {
         setLoading(true);
         const address = await getAddressFromCoordinates(location.latitude, location.longitude);
         setAddress(address);
+        setLocalStartPoint(address); // Set local start point to the current address
         setLoading(false);
       })();
     }
   }, [location]);
 
+  // Debounce function
+  const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
+
+  // Fetch suggestions for starting point and destination
+  const fetchSuggestions = async (text) => {
+    if (text.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    setLoadingSuggestions(true);
+
+    const url = `https://nominatim.openstreetmap.org/search?q=${text}&format=json&addressdetails=1&limit=5`;
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'YourAppName/1.0 (your.email@example.com)',
+        },
+      });
+      const results = response.data.map((result) => ({
+        id: result.place_id,
+        title: result.display_name,
+      }));
+      setSuggestions(results);
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  // Debounced fetch
+  const debouncedFetchSuggestions = useCallback(debounce(fetchSuggestions, 3000), []);
+
+  const handleStartPointChange = (text) => {
+    setLocalStartPoint(text);
+    if (text !== lastQuery) {
+      setLastQuery(text);
+      debouncedFetchSuggestions(text); // Fetch suggestions for starting point
+    }
+  };
+
+  const handleDestinationChange = (text) => {
+    setLocalDestination(text);
+    if (text !== lastQuery) {
+      setLastQuery(text);
+      debouncedFetchSuggestions(text); // Fetch suggestions for destination
+    }
+  };
+
+  const handleSuggestionSelect = (suggestion, isStartPoint) => {
+    if (isStartPoint) {
+      setLocalStartPoint(suggestion.title); // Update the starting point
+    } else {
+      setLocalDestination(suggestion.title); // Update the destination
+    }
+    setSuggestions([]);
+  };
+
   const handleContinue = () => {
-    setDestination(localDestination); // Update the main destination state
+    setDestination(localDestination);
     navigation.navigate('TravelTime'); // Navigate to the TravelTimeScreen
   };
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Current Location Section */}
         <View style={styles.locationBox}>
           {loading ? (
             <ActivityIndicator size="small" color="#0000ff" />
@@ -43,18 +118,40 @@ function TripDetailsScreen({ route }) {
           <Icon name="location-on" type="material" color="#000" size={24} containerStyle={styles.icon} />
         </View>
 
-        {/* Destination Address Input Section */}
+        {/* Starting Point Input Section */}
+        <View style={styles.destinationBox}>
+          <TextInput
+            style={styles.destinationInput}
+            placeholder="Enter your starting point"
+            value={localStartPoint}
+            onChangeText={handleStartPointChange}
+          />
+          <Icon name="search" type="material" color="#000" size={24} containerStyle={styles.icon} />
+        </View>
+
+        {/* Destination Input Section */}
         <View style={styles.destinationBox}>
           <TextInput
             style={styles.destinationInput}
             placeholder="Enter your destination address"
             value={localDestination}
-            onChangeText={setLocalDestination} // Update the local state
+            onChangeText={handleDestinationChange}
           />
           <Icon name="search" type="material" color="#000" size={24} containerStyle={styles.icon} />
         </View>
 
-        {/* Button to Continue to TravelTimeScreen */}
+        {loadingSuggestions && <ActivityIndicator size="small" color="#0000ff" />}
+        <FlatList
+          data={suggestions}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => handleSuggestionSelect(item, true)}>
+              <Text style={styles.suggestionText}>{item.title}</Text>
+            </TouchableOpacity>
+          )}
+          style={styles.suggestionList}
+        />
+
         <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
           <Text style={styles.continueButtonText}>Continue</Text>
         </TouchableOpacity>
@@ -102,6 +199,16 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: '#f0f0f0',
     borderRadius: 5,
+  },
+  suggestionList: {
+    maxHeight: 150,
+    marginBottom: 10,
+  },
+  suggestionText: {
+    padding: 10,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   continueButton: {
     backgroundColor: '#4CAF50',

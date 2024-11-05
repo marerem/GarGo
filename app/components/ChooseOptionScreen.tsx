@@ -25,11 +25,7 @@ function ChooseOptionScreen() {
   ];
 
   const handleConfirm = () => {
-    // Navigate to next screen or perform an action with the selected option
-    if (selectedOption) {
-      // Add your logic here
-      navigation.goBack();
-    }
+    navigation.navigate('MapsScreen');
   };
 
   return (
@@ -52,28 +48,12 @@ function ChooseOptionScreen() {
       {/* Options List */}
       <View style={styles.optionContainer}>
         <Text style={styles.optionTitle}>Choose an option</Text>
-        <FlatList
-          data={options}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.option,
-                selectedOption === item.id && styles.selectedOption,
-              ]}
-              onPress={() => setSelectedOption(item.id)}
-            >
-              <View style={styles.iconContainer}>
-                <Text style={styles.icon}>📦</Text> {/* Replace with an icon as needed */}
-              </View>
-              <View style={styles.optionDetails}>
-                <Text style={styles.optionText}>{item.title}</Text>
-                <Text style={styles.optionSubText}>{item.time}</Text>
-              </View>
-              <Text style={styles.optionPrice}>{item.price}</Text>
-            </TouchableOpacity>
-          )}
-        />
+       
+
+        {/* Button to choose best options and navigate to package selection */}
+        <TouchableOpacity style={styles.bestOptionsButton} onPress={() => navigation.navigate('SelectPackage')}>
+          <Text style={styles.bestOptionsButtonText}>Choose Best Options</Text>
+        </TouchableOpacity>
 
         {/* Confirm Button */}
         <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
@@ -92,17 +72,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionContainer: {
+    position: 'absolute', // Ensure it's positioned above the map
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     paddingBottom: 10,
     alignItems: 'center',
+    elevation: 5, // Shadow effect for Android
+    zIndex: 1, // Bring the options above the map
   },
   optionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#333',
   },
   option: {
     flexDirection: 'row',
@@ -112,20 +99,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 5,
     width: '100%',
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   selectedOption: {
     borderColor: '#4CAF50',
     borderWidth: 2,
     backgroundColor: '#E8F5E9',
-  },
-  iconContainer: {
-    backgroundColor: '#E0E0E0',
-    padding: 8,
-    borderRadius: 8,
-    marginRight: 10,
-  },
-  icon: {
-    fontSize: 20,
   },
   optionDetails: {
     flex: 1,
@@ -133,6 +113,7 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#000',
   },
   optionSubText: {
     fontSize: 12,
@@ -142,6 +123,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#4CAF50',
+    paddingLeft: 10,
+  },
+  bestOptionsButton: {
+    backgroundColor: '#FFA500', // Orange color for visibility
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 10,
+  },
+  bestOptionsButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   confirmButton: {
     backgroundColor: '#4CAF50',
