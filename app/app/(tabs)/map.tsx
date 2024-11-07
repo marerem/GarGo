@@ -71,10 +71,10 @@ export default function Maps() {
       <Stack.Screen name="TravelTime" component={TravelTimeScreen} options={{ title: 'Travel Time' }} />
       <Stack.Screen name="TravelMethod" component={TravelMethodScreen} options={{ title: 'Travel Method' }} />
       <Stack.Screen name="SpaceAvailability" component={SpaceAvailabilityScreen} options={{ title: 'Space Availability' }} />
-      <Stack.Screen name="ChooseOption" component={ChooseOptionScreen} options={{ title: 'Choose Option' }} />
+      <Stack.Screen name="ChooseOption" component={ChooseOptionScreen} options={react-native-maps{ title: 'Choose Option' }} />
       <Stack.Screen name="SelectPackage" component={SelectPackageScreen} />
 
-    </Stack.Navigator>
+    </Stack.Navigator>react-native-maps
   );
 }
 
