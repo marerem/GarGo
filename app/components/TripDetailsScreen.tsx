@@ -16,6 +16,7 @@ function TripDetailsScreen({ route }) {
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [lastQuery, setLastQuery] = useState(''); // Track last query
+  const [activeInput, setActiveInput] = useState(''); // Track which input is active
 
   useEffect(() => {
     if (location) {
@@ -76,6 +77,7 @@ function TripDetailsScreen({ route }) {
 
   const handleStartPointChange = (text) => {
     setLocalStartPoint(text);
+    setActiveInput('start');
     if (text !== lastQuery) {
       setLastQuery(text);
       debouncedFetchSuggestions(text); // Fetch suggestions for starting point
@@ -84,14 +86,15 @@ function TripDetailsScreen({ route }) {
 
   const handleDestinationChange = (text) => {
     setLocalDestination(text);
+    setActiveInput('destination');
     if (text !== lastQuery) {
       setLastQuery(text);
       debouncedFetchSuggestions(text); // Fetch suggestions for destination
     }
   };
 
-  const handleSuggestionSelect = (suggestion, isStartPoint) => {
-    if (isStartPoint) {
+  const handleSuggestionSelect = (suggestion) => {
+    if (activeInput === 'start') {
       setLocalStartPoint(suggestion.title); // Update the starting point
     } else {
       setLocalDestination(suggestion.title); // Update the destination
@@ -125,6 +128,7 @@ function TripDetailsScreen({ route }) {
             placeholder="Enter your starting point"
             value={localStartPoint}
             onChangeText={handleStartPointChange}
+            onFocus={() => setActiveInput('start')}
           />
           <Icon name="search" type="material" color="#000" size={24} containerStyle={styles.icon} />
         </View>
@@ -136,6 +140,7 @@ function TripDetailsScreen({ route }) {
             placeholder="Enter your destination address"
             value={localDestination}
             onChangeText={handleDestinationChange}
+            onFocus={() => setActiveInput('destination')}
           />
           <Icon name="search" type="material" color="#000" size={24} containerStyle={styles.icon} />
         </View>
@@ -145,7 +150,7 @@ function TripDetailsScreen({ route }) {
           data={suggestions}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleSuggestionSelect(item, true)}>
+            <TouchableOpacity onPress={() => handleSuggestionSelect(item)}>
               <Text style={styles.suggestionText}>{item.title}</Text>
             </TouchableOpacity>
           )}
