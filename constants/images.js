@@ -1,0 +1,11 @@
+import profile from "../assets/images/profile.png";
+import thumbnail from "../assets/images/thumbnail.png";
+import cards from "../assets/images/cards.png";
+import path from "../assets/images/path.png";
+import logo from "../assets/images/logo.png";
+import logoSmall from "../assets/images/logo-small.png";
+import empty from "../assets/images/empty.png";
+import whitelogo from "../assets/images/white_logo.jpg";
+import greenlogo from "../assets/images/green_logo.jpg";
+import shortlogo from "../assets/images/short.png";
+export default { profile, thumbnail, cards, path, logo, logoSmall, empty, whitelogo, greenlogo, shortlogo };
