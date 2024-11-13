@@ -1,12 +1,34 @@
-/* Import installed modules */
-import { Text, View } from 'react-native'
-import React from 'react'
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Home from '../../components/profile/Home';
+import SettingsMenu from '../../components/profile/SettingsMenu';
+import Password from '../../components/profile/Password';
 
-/* Define and export the component */
-export default function Home() {
+const ProfileStack = createNativeStackNavigator();
+
+export default function Profile() {
   return (
-    <View className="flex justify-center items-center h-full">
-      <Text>Profile</Text>
-    </View>
-  )
+    <ProfileStack.Navigator initialRouteName="Home">
+      <ProfileStack.Screen 
+        name="Home" 
+        component={Home} 
+        options={{ headerShown: false }} // Hides the header for Home
+      />
+      <ProfileStack.Screen 
+        name="SettingsMenu" 
+        component={SettingsMenu} 
+        options={{ 
+          title: 'Settings',         // Shows a title for SettingsMenu
+          headerBackTitle: 'Back'    // Sets the back button text to "Back"
+        }}
+      />  
+      <ProfileStack.Screen 
+        name="Password" 
+        component={Password} 
+        options={{ 
+          title: 'Change Password' 
+        }}
+      />
+    </ProfileStack.Navigator>
+  );
 }
