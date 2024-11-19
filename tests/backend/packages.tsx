@@ -1,7 +1,8 @@
 import Package, {PackageStatus, Volume} from "@/lib/backend/packages"
 import * as DocumentPicker from "expo-document-picker";
+import { Query } from "react-native-appwrite";
 
-export default async function test(idUser: string) {
+export async function testCreation(idUser: string) {
     /* Create a new package */
     const p = new Package()
 
@@ -29,5 +30,11 @@ export default async function test(idUser: string) {
 
     /* Delete the package */
     await p.delete()
+}
 
+export async function testLoading() {
+    let packages = await Package.getPackages([
+        Query.equal('title', ['Package title box']),
+    ])
+    console.log(packages)
 }
