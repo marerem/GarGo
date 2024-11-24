@@ -9,5 +9,5 @@ export const DB_SETTINGS = {
 export const LIMIT_IMAGES = { "MIN": 1, "MAX": 5 }
 
 /* Define some enums */
-export enum PackageStatus { Pending = "created", InTransit = "assigned", Delivered = "delivered", Cancelled = "cancelled", Assigned = "assigned" }
+export enum PackageStatus { Pending = "created", InTransit = "assigned", Delivered = "delivered", Cancelled = "cancelled"}
 export enum Volume { XS = "XS", S = "S", M = "M", L = "L", XL = "XL", XXL = "XXL", XXXL = "XXXL" }
