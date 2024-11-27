@@ -33,6 +33,7 @@ function LocationOverlay({  }) {
           if (geocode.length > 0) {
             const { name, city, region, country } = geocode[0];
             setAddress(`${name}, ${city}, ${region}, ${country}`);
+            Storage.setItem("startLocation", `${name}, ${city}, ${region}, ${country}`);
           } else {
             setAddress("Location not found");
           }

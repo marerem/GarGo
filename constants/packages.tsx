@@ -2,7 +2,8 @@
 export const DB_SETTINGS = {
     "DB_ID": "672906a800238300cad3",
     "PACKAGES_COLLECTION_ID": "673b99e8000a42e78980",
-    "PACKAGES_BUCKET_ID": "673baa3d001086dde1d9"
+    "PACKAGES_BUCKET_ID": "673baa3d001086dde1d9",
+    "DELIVERY_COLLECTION_ID" : "6743821b0039cd6a570f"
 }
 
 /* Define some constants */

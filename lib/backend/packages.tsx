@@ -211,6 +211,9 @@ export default class Package {
         this.setWeight(weight);
         this.setVolume(volume);
     }
+    setStatus(status: PackageStatus){
+        this.status = status;
+    }
 
     /* Define the source location setter */
     setSourceLocation(lang: number, long: number, full_address: string) {

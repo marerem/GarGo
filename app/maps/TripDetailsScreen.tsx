@@ -126,9 +126,11 @@ function TripDetailsScreen({  }) {
       setLocalStartPoint(suggestion.location); // Update the starting point
       setAddress(suggestion.title)
       Storage.setItem('startPoint', suggestion.location); // Save it in AsyncStorage
+      Storage.setItem("startLocation", suggestion.title);
     } else {
       setLocalDestination(suggestion.title); // Update the destination
       Storage.setItem('destination', suggestion.title); // Save it in AsyncStorage
+      Storage.setItem("endPoint", suggestion.location);
     }
     setSuggestions([]);
   };
