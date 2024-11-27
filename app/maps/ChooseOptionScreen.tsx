@@ -18,7 +18,6 @@ function ChooseOptionScreen() {
     const fetchStartPointAndPackages = async () => {
       const storedStartPoint = await Storage.getItem('startPoint');
       const storedEndPoint = await Storage.getItem('endPoint');
-      console.log(storedStartPoint, storedEndPoint)
       if (storedStartPoint && storedEndPoint) {
         const parsedStartPoint = typeof storedStartPoint === 'string' 
           ? JSON.parse(storedStartPoint)
@@ -107,16 +106,12 @@ function ChooseOptionScreen() {
           p.setDestinationLocation(endPoint?.latitude, endPoint?.longitude, destination);
 
           p.setSourceLocation(startPoint.latitude, startPoint.longitude, startLocation);
-          console.log(999)
           // Create a new delivery
           await p.create(selectedPackage.id);
-          console.log(43)
 
-          console.log('Query:', Query.equal('id', [selectedPackage.id]));
 
           // Fetch packages (since it's async, you must await it)
           const packages = await Package.getPackages([Query.equal('$id', [selectedPackage.id])]);
-          console.log(packages, selectedPackage.id);
 
     
           if (packages && packages.length > 0) {

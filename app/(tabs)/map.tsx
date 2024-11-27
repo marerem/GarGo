@@ -13,6 +13,7 @@ import SpaceAvailabilityScreen from '@/app/maps/SpaceAvailabilityScreen';
 import ChooseOptionScreen from '@/app/maps/ChooseOptionScreen';
 import SelectPackageScreen from '@/app/maps/SelectPackageScreen';
 import { useFocusEffect } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 
 const Stack = createNativeStackNavigator();
 
@@ -76,6 +77,8 @@ function MapsScreen({ navigation }) {
 // Main App with Stack Navigation
 export default function Maps() {
   return (
+    <NavigationContainer>
+
     <Stack.Navigator initialRouteName="MapsScreen">
       <Stack.Screen 
         name="MapsScreen" 
@@ -93,6 +96,8 @@ export default function Maps() {
       <Stack.Screen name="ChooseOption" component={ChooseOptionScreen} options={{ title: 'Choose Option' }} />
       <Stack.Screen name="SelectPackage" component={SelectPackageScreen} />
     </Stack.Navigator>
+    </NavigationContainer>
+
   );
 }
 

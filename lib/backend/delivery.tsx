@@ -21,7 +21,6 @@ class Delivery {
     /* Define create, update, delete methods */
 
     async create(packageId: string) {
-        console.log(packageId);
         /* Set the package ID */
         this.packageId = packageId;
 
@@ -29,25 +28,11 @@ class Delivery {
         if (!this.src_full_address || !this.dst_full_address ) {
             throw new Error("Missing required fields to create a delivery");
         }
-        console.log(228)
         /* Generate a unique ID for the delivery */
         this.id = ID.unique();
 
         /* Create the delivery in the database */
         const database = new Databases(client);
-        console.log(1337)
-        console.log({
-            src_lang: this.src_lang,
-            src_long: this.src_long,
-            src_full_address: this.src_full_address,
-            dst_lang: this.dst_lang,
-            dst_long: this.dst_long,
-            dst_full_address: this.dst_full_address,
-            packageId: this.packageId,
-            seatAvailability: this.seatAvailability,
-            travelMethods: this.travelMethods,
-            travelTime: this.travelTime,
-        });
         
         try {
 
