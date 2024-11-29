@@ -34,6 +34,7 @@ export default class Package {
     status: PackageStatus = PackageStatus.Pending;
     imagesIDs: string[] = [];
     previewsUrls: URL[] = [];
+    deliverID : string | null = null;
 
     /* Define create, modify and delete methods */
     async create(senderID: string, images: { uri: string; type: string; size: number }[]) {
@@ -90,7 +91,8 @@ export default class Package {
                 volume: this.volume,
                 images_ids: this.imagesIDs,
                 status: this.status,
-                senderID: this.senderID
+                senderID: this.senderID,
+                deliverID: this.deliverID
             }
         );
     }
@@ -120,7 +122,8 @@ export default class Package {
                 volume: this.volume,
                 images_ids: this.imagesIDs,
                 status: this.status,
-                senderID: this.senderID
+                senderID: this.senderID,
+                deliverID: this.deliverID
             }
         );
     }
@@ -203,6 +206,9 @@ export default class Package {
         }
 
         this.volume = volume;
+    }
+    setDeliverID(id : string){
+        this.deliverID = id;
     }
 
     setInfo(title: string, description: string, weight: number, volume: Volume) {
