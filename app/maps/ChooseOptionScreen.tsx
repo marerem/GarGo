@@ -6,10 +6,13 @@ import Storage from '@/app/maps/StorageMap'; // Import your Storage class
 import Package, { PackageStatus, Volume } from "@/lib/backend/packages";
 import { Query } from "react-native-appwrite";
 import Delivery from "@/lib/backend/delivery"
+import { useAuthContext } from '@/context/AuthProvider'
+
 function ChooseOptionScreen() {
   const navigation = useNavigation();
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
+  const user = useAuthContext();
 
   const [selectedPackage, setSelectedPackage] = useState(null);
 
@@ -117,6 +120,10 @@ function ChooseOptionScreen() {
           if (packages && packages.length > 0) {
             // Update the package status
             packages[0].setStatus(PackageStatus.InTransit);
+            //console.log(user, user.user['$id']);
+            packages[0].setDeliverID(user.user['$id'])
+            //throw new Error("Something went wrong!");
+            //packages[0].setDeliverId();
             await packages[0].update(); // Assuming this is also an async call
           }
         } catch (error) {
