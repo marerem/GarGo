@@ -21,6 +21,12 @@ export default function ChangePassword() {
     confirmNew: false,
   });
 
+  const [isFocused, setFocused] = useState({
+    current: false,
+    new: false,
+    confirmNew: false,
+  });
+
   /* Toggle password visibility */
   const togglePasswordVisibility = (field) => {
     setPasswordVisible((prevState) => ({
@@ -45,6 +51,10 @@ export default function ChangePassword() {
       Alert.alert("Error", "Password does not meet criteria");
       return;
     }
+    
+    // Log the current and new passwords for debugging
+    console.log("Current Password:", form.currentPassword);
+    console.log("New Password:", form.newPassword);
 
     setSubmitting(true);
     try {
@@ -84,14 +94,18 @@ export default function ChangePassword() {
               placeholder="Enter current password"
               handleChangeText={(value) => setForm({ ...form, currentPassword: value })}
               viewAdditionalStyle="mt-10"
+              onFocus={() => setFocused({ ...isFocused, current: true })}
+              onBlur={() => setFocused({ ...isFocused, current: false })}
             />
             {/* Eye Icon for Current Password */}
-            <TouchableOpacity
-              onPress={() => togglePasswordVisibility('current')}
-              style={{ position: 'absolute', right: 10, top: 15 }}
-            >
-              <Ionicons name={isPasswordVisible.current ? "eye-off" : "eye"} size={24} color="gray" />
-            </TouchableOpacity>
+            {isFocused.current && (
+              <TouchableOpacity
+                onPress={() => togglePasswordVisibility('current')}
+                style={{ position: 'absolute', right: 10, top: 15 }}
+              >
+                <Ionicons name={isPasswordVisible.current ? "eye-off" : "eye"} size={24} color="gray" />
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* New Password Field */}
@@ -103,14 +117,18 @@ export default function ChangePassword() {
               placeholder="Enter new password"
               handleChangeText={(value) => setForm({ ...form, newPassword: value })}
               viewAdditionalStyle="mt-7"
+              onFocus={() => setFocused({ ...isFocused, new: true })}
+              onBlur={() => setFocused({ ...isFocused, new: false })}
             />
             {/* Eye Icon for New Password */}
-            <TouchableOpacity
-              onPress={() => togglePasswordVisibility('new')}
-              style={{ position: 'absolute', right: 10, top: 15 }}
-            >
-              <Ionicons name={isPasswordVisible.new ? "eye-off" : "eye"} size={24} color="gray" />
-            </TouchableOpacity>
+            {isFocused.new && (
+              <TouchableOpacity
+                onPress={() => togglePasswordVisibility('new')}
+                style={{ position: 'absolute', right: 10, top: 15 }}
+              >
+                <Ionicons name={isPasswordVisible.new ? "eye-off" : "eye"} size={24} color="gray" />
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Confirm New Password Field */}
@@ -122,14 +140,18 @@ export default function ChangePassword() {
               placeholder="Re-enter new password"
               handleChangeText={(value) => setForm({ ...form, confirmNewPassword: value })}
               viewAdditionalStyle="mt-7"
+              onFocus={() => setFocused({ ...isFocused, confirmNew: true })}
+              onBlur={() => setFocused({ ...isFocused, confirmNew: false })}
             />
             {/* Eye Icon for Confirm New Password */}
-            <TouchableOpacity
-              onPress={() => togglePasswordVisibility('confirmNew')}
-              style={{ position: 'absolute', right: 10, top: 15 }}
-            >
-              <Ionicons name={isPasswordVisible.confirmNew ? "eye-off" : "eye"} size={24} color="gray" />
-            </TouchableOpacity>
+            {isFocused.confirmNew && (
+              <TouchableOpacity
+                onPress={() => togglePasswordVisibility('confirmNew')}
+                style={{ position: 'absolute', right: 10, top: 15 }}
+              >
+                <Ionicons name={isPasswordVisible.confirmNew ? "eye-off" : "eye"} size={24} color="gray" />
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Password Criteria */}

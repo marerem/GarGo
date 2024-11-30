@@ -1,5 +1,5 @@
 /* Import Appwrite modules */
-import { Account, ID } from "react-native-appwrite";
+import { Account, ID , Client} from "react-native-appwrite";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /* Import the client */
@@ -44,4 +44,35 @@ export default class Auth {
         await AsyncStorage.removeItem("expire"); // Remove the information about the session expiration
         await account.deleteSession("current"); // Delete the current session
     }
+    static async changePassword(currentPassword: string, newPassword: string) {
+        try {
+            // Retrieve the current user's email
+            const user = await account.get();
+            const email = user.email;
+    
+            // Step 1: Update the password directly using the current password and the new password
+            await account.updatePassword(newPassword, currentPassword); // This is the correct method
+    
+            // Step 2: Log out the current session (optional, depends on your app's requirements)
+            await account.deleteSession("current");
+    
+            // Step 3: Log back in with the new password if required by your app
+            const newSession = await account.createEmailPasswordSession(email, newPassword);
+    
+        } catch (error) {
+            // Log the actual error to understand what went wrong
+            console.error("Error in changePassword:", error.response ? error.response : error.message);
+    
+            // Provide the user with a more specific error message
+            if (error.message.includes("Invalid credentials")) {
+                throw new Error("Current password is incorrect. Please try again.");
+            } else if (error.message.includes("session is active")) {
+                throw new Error("A session is still active. Please log out and try again.");
+            } else if (error.message.includes("password")) {
+                throw new Error("Password update failed. Please ensure your new password is valid.");
+            } else {
+                throw new Error("Failed to update password. Please try again later.");
+            }
+        }
+    }    
 }

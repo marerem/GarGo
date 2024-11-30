@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Home from '../../components/profile/Home';
 import SettingsMenu from '../../components/profile/SettingsMenu';
 import Password from '../../components/profile/Password';
+import Payments from '../../components/profile/Payments';
 
 const ProfileStack = createNativeStackNavigator();
 
@@ -21,7 +22,15 @@ export default function Profile() {
           title: 'Settings',         // Shows a title for SettingsMenu
           headerBackTitle: 'Back'    // Sets the back button text to "Back"
         }}
-      />  
+      /> 
+      <ProfileStack.Screen 
+        name="Payments" 
+        component={Payments} 
+        options={{ 
+          title: 'Payments', 
+          headerBackTitle: 'Back' 
+        }}
+      />
       <ProfileStack.Screen 
         name="Password" 
         component={Password} 
