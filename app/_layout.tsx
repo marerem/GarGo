@@ -1,6 +1,7 @@
 /* Import installed modules */
 import React, { useEffect } from 'react'
 import { SplashScreen, Stack } from 'expo-router'
+import { NavigationContainer } from '@react-navigation/native'; // Import NavigationContainer
 import { useFonts } from 'expo-font'
 
 /* Import custom modules */
@@ -30,11 +31,14 @@ const RootLayout = () => {
   /* Return the component template */
   return (
     <AuthProvider>
-      <Stack initialRouteName='index'>
-        <Stack.Screen name='index' options={{ headerShown: false }} />
-        <Stack.Screen name='(auth)' options={{ headerShown: false }} />
-        <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-      </Stack>
+      <NavigationContainer>
+        {/* NavigationContainer wraps the Stack */}
+        <Stack initialRouteName="index">
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </NavigationContainer>
     </AuthProvider>
   );
 };
