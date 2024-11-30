@@ -1,27 +1,201 @@
-/* Import installed modules */
-import { Text, View, TouchableOpacity } from 'react-native'
-import React from 'react'
-import { router } from 'expo-router';
+import { useState, useEffect } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { FlatList, Image, RefreshControl, Text, View, Alert, TouchableOpacity, Modal, ScrollView } from "react-native";
 
-/* Import custom modules */
-import Auth from "@/lib/backend/auth";
 
-/* Define and export the component */
-export default function Home() {
-  const logout = async () => {
-    /* Implement the logout logic */
-    await Auth.logout()
+import { images } from "../../constants";
+import ParcelCard from "@/components/ParcelCard";
+import SearchInput from "@/components/SearchInput";
+import Trending from "@/components/Trending";
+import EmptyState from "@/components/EmptyState";
+import { useAuthContext } from "@/context/AuthProvider";
+import Package, { PackageStatus } from "@/lib/backend/packages";
+import { Query } from "react-native-appwrite";
 
-    /* Redirect the user to the sign in page */
-    router.replace("/")
-  }
+import client from "@/lib/backend/client";
+
+const Home = () => {
+
+  const { user } = useAuthContext();
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedParcel, setSelectedParcel] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // Function to fetch all packages
+  const fetchPackages = async () => {
+    const pkgs = await Package.getPackages([
+      Query.equal("status", PackageStatus.Pending),
+      Query.equal("senderID", user?.$id),
+      Query.orderDesc("$createdAt")
+    ]);
+    setPackages(pkgs);
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchPackages();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchPackages();
+    setRefreshing(false);
+  };
+
+  const handleDelete = async (parcel) => {
+    try {
+      Alert.alert(
+        "Delete Parcel",
+        "Are you sure you want to delete this parcel?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              await parcel.delete();
+              setModalVisible(false);
+              await fetchPackages();
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      Alert.alert("Error", "Failed to delete parcel");
+    }
+  };
+
+  // Get latest packages from the main packages array
+  const latestPackages = packages.slice(0, 5);  // Take first 5 packages for trending
+
+  const handleParcelPress = (parcel) => {
+    setSelectedParcel(parcel);
+    setModalVisible(true);
+  };
+
+  const renderParcelCard = ({ item }) => (
+    <View key={item.id} style={{ marginBottom: 10 }}>
+      <ParcelCard
+        title={item.title}
+        images={item.previewsUrls ? [item.previewsUrls[0].href] : []}
+        creator={item.senderID}
+        avatar={undefined}
+        pickup={item.src_full_address}
+        dropoff={item.dest_full_address}
+        description={item.description}
+        volume={item.volume}
+        weight={item.weight}
+        onPress={() => handleParcelPress(item)}
+        onMenuPress={() => handleParcelPress(item)}
+      />
+    </View>
+  );
 
   return (
-    <View className="flex justify-center items-center h-full">
-      <Text className="text-2xl">Welcome to CarGo relay</Text>
-      <TouchableOpacity onPress={logout} className="mt-5 bg-blue-500 p-4 rounded-md">
-        <Text className="text-white">Logout</Text>
-      </TouchableOpacity>
-    </View>
-  )
-}
+    <SafeAreaView className="bg-primary">
+      <FlatList
+        data={packages}
+        keyExtractor={(item) => item.id}
+        renderItem={renderParcelCard}
+        ListHeaderComponent={() => (
+          <View className="flex my-6 px-4 space-y-6">
+            <View className="flex justify-between items-start flex-row mb-6">
+              <View>
+                <Text className="font-pmedium text-sm text-gray-100">
+                  Welcome Back
+                </Text>
+                <Text className="text-2xl font-psemibold text-white">
+                  {user?.name || "Guest"}
+                </Text>
+              </View>
+
+              <View className="mt-1.5">
+                <Image
+                  source={images.logoSmall}
+                  className="w-9 h-10"
+                  resizeMode="contain"
+                />
+              </View>
+            </View>
+
+            <SearchInput />
+
+            <View className="w-full flex-1 pt-5 pb-8">
+              <Text className="text-lg font-pregular text-gray-100 mb-3">
+                Latest Packages
+              </Text>
+
+              <Trending packages={latestPackages} onParcelPress={handleParcelPress} />
+            </View>
+          </View>
+        )}
+        ListEmptyComponent={() => (
+          <EmptyState
+            title="No Packages Found"
+            subtitle="No packages created yet"
+          />
+        )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white rounded-lg p-6 w-11/12 max-h-[80%]">
+            <ScrollView>
+              <Text className="text-xl font-bold mb-4">{selectedParcel?.title}</Text>
+              
+              <Text className="font-bold mt-4 mb-2">Package Images:</Text>
+              <ScrollView horizontal className="mb-4">
+                {selectedParcel?.previewsUrls?.map((url, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: url.href }}
+                    className="w-40 h-40 rounded-lg mr-2"
+                    resizeMode="cover"
+                  />
+                ))}
+              </ScrollView>
+
+              <Text className="font-bold">Details:</Text>
+              <Text>Created by: {user?.name}</Text>
+              <Text>Description: {selectedParcel?.description}</Text>
+              <Text>Pickup: {selectedParcel?.src_full_address}</Text>
+              <Text>Dropoff: {selectedParcel?.dest_full_address}</Text>
+              <Text>Volume: {selectedParcel?.volume}</Text>
+              <Text>Weight: {selectedParcel?.weight}kg</Text>
+              
+              <View className="flex-row space-x-2 mt-6">
+                <TouchableOpacity 
+                  onPress={() => setModalVisible(false)}
+                  className="flex-1 bg-gray-500 py-3 rounded-lg"
+                >
+                  <Text className="text-white text-center">Close</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  onPress={() => handleDelete(selectedParcel)}
+                  className="flex-1 bg-red-500 py-3 rounded-lg"
+                >
+                  <Text className="text-white text-center">Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+};
+
+export default Home;
