@@ -77,7 +77,6 @@ function MapsScreen({ navigation }) {
 // Main App with Stack Navigation
 export default function Maps() {
   return (
-    <NavigationContainer>
 
     <Stack.Navigator initialRouteName="MapsScreen">
       <Stack.Screen 
@@ -96,7 +95,6 @@ export default function Maps() {
       <Stack.Screen name="ChooseOption" component={ChooseOptionScreen} options={{ title: 'Choose Option' }} />
       <Stack.Screen name="SelectPackage" component={SelectPackageScreen} />
     </Stack.Navigator>
-    </NavigationContainer>
 
   );
 }
