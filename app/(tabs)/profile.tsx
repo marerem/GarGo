@@ -4,6 +4,7 @@ import Home from '../../components/profile/Home';
 import SettingsMenu from '../../components/profile/SettingsMenu';
 import Password from '../../components/profile/Password';
 // import Payments from '../../components/profile/Payments';
+import { NavigationContainer } from '@react-navigation/native';
 
 const ProfileStack = createNativeStackNavigator();
 
@@ -14,6 +15,8 @@ export default function Profile() {
   }, []);
 
   return (
+    <NavigationContainer>
+
     <ProfileStack.Navigator initialRouteName="Home">
       {/* Debugging output for each screen */}
       <ProfileStack.Screen 
@@ -62,5 +65,7 @@ export default function Profile() {
         }}
       />
     </ProfileStack.Navigator>
+    </NavigationContainer>
+
   );
 }

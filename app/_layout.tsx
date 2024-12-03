@@ -31,14 +31,12 @@ const RootLayout = () => {
   /* Return the component template */
   return (
     <AuthProvider>
-      <NavigationContainer>
         {/* NavigationContainer wraps the Stack */}
         <Stack initialRouteName="index">
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
-      </NavigationContainer>
     </AuthProvider>
   );
 };
