@@ -31,6 +31,7 @@ function ChooseOptionScreen() {
 
         // Fetch packages and find the closest one
         const packages = await Package.getPackages([Query.equal('status', [PackageStatus.Pending]),Query.notEqual('senderID', user.user['$id'])]);
+        const kek = await Package.getPackages([]);
         const closestPackage = findClosestPackage(parsedStartPoint, storedEndPoint, packages);
         setSelectedPackage(closestPackage);
       }
