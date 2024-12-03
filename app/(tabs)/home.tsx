@@ -32,10 +32,6 @@ const Home = () => {
         Query.limit(100)
       ]);
       
-      // Log the complete raw package object
-      pkgs.forEach(pkg => {
-        console.log('Complete Package Object:', JSON.stringify(pkg, null, 2));
-      });
       
       const userPackages = pkgs.filter(pkg => 
         pkg.senderID === user.$id || pkg.deliverID === user.$id
@@ -84,12 +80,110 @@ const Home = () => {
     }
   };
 
-  // Get latest packages from the main packages array
-  const latestPackages = packages.slice(0, 5);  // Take first 5 packages for trending
+  const handleCancelDelivery = async (parcel) => {
+    try {
+      Alert.alert(
+        "Cancel Delivery",
+        "Are you sure you want to cancel this delivery?",
+        [
+          {
+            text: "No",
+            style: "cancel"
+          },
+          {
+            text: "Yes",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                console.log('Attempting to update package:', parcel.id);
+                console.log('Current status:', parcel.status);
+                console.log('Current deliverID:', parcel.deliverID);
+                
+                // Fetch packages (since it's async, you must await it)
+                const packages = await Package.getPackages([Query.equal('$id', [parcel.id])]);
+          
+                if (packages && packages.length > 0) {
+                  // Update the package status
+                  packages[0].setStatus(PackageStatus.Pending);
+                  packages[0].setDeliverID(null);
+                  await packages[0].update();
+                }
+                
+                console.log('Update successful');
+                setModalVisible(false);
+                await fetchPackages();
+              } catch (updateError) {
+                console.error('Error during update:', updateError);
+                Alert.alert("Error", "Failed to update package status");
+              }
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error in cancel delivery:', error);
+      Alert.alert("Error", "Failed to cancel delivery");
+    }
+  };
+
+  const handleMarkDelivered = async (parcel) => {
+    try {
+      Alert.alert(
+        "Delivered",
+        "Are you sure you want to mark this package as delivered?",
+        [
+          {
+            text: "No",
+            style: "cancel"
+          },
+          {
+            text: "Yes",
+            onPress: async () => {
+              try {
+                const packages = await Package.getPackages([Query.equal('$id', [parcel.id])]);
+        
+                if (packages && packages.length > 0) {
+                  packages[0].setStatus(PackageStatus.Delivered);
+                  await packages[0].update();
+                }
+                
+                console.log('Package marked as delivered');
+                setModalVisible(false);
+                await fetchPackages();
+              } catch (updateError) {
+                console.error('Error marking as delivered:', updateError);
+                Alert.alert("Error", "Failed to update package status");
+              }
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error marking as delivered:', error);
+      Alert.alert("Error", "Failed to mark as delivered");
+    }
+  };
+
+  // Modify the trending packages section to exclude delivered packages
+  const senderPackages = packages
+    .filter(pkg => pkg.senderID === user.$id)
+    .slice(0, 5);  // Take first 5 packages for trending
+
+  const delivererPackages = packages
+    .filter(pkg => 
+      pkg.deliverID === user.$id && 
+      pkg.status !== 'delivered'  // Add this condition to exclude delivered packages
+    )
+    .slice(0, 5);  // Take first 5 packages for trending
 
   const handleParcelPress = (parcel) => {
     setSelectedParcel(parcel);
     setModalVisible(true);
+  };
+
+  // Add this helper function to determine if delete is allowed
+  const isDeleteAllowed = (parcel) => {
+    return parcel.senderID === user.$id && parcel.status !== PackageStatus.InTransit;
   };
 
   const renderParcelCard = ({ item }) => (
@@ -106,7 +200,11 @@ const Home = () => {
         volume={item.volume}
         weight={item.weight}
         onPress={() => handleParcelPress(item)}
-        onMenuPress={() => handleParcelPress(item)}
+        onMenuPress={
+          item.status === PackageStatus.Delivered 
+            ? undefined 
+            : () => handleParcelPress(item)
+        }
       />
     </View>
   );
@@ -142,10 +240,18 @@ const Home = () => {
 
             <View className="w-full flex-1 pt-5 pb-8">
               <Text className="text-lg font-pregular text-gray-100 mb-3">
-                Latest Packages
+                Your Sent Packages
               </Text>
+              <Trending 
+                packages={senderPackages} 
+                onParcelPress={handleParcelPress}
+                disableDelete={(pkg) => !isDeleteAllowed(pkg)}
+              />
 
-              <Trending packages={latestPackages} onParcelPress={handleParcelPress} />
+              <Text className="text-lg font-pregular text-gray-100 mb-3 mt-6">
+                Your Delivery Jobs
+              </Text>
+              <Trending packages={delivererPackages} onParcelPress={handleParcelPress} />
             </View>
           </View>
         )}
@@ -167,7 +273,14 @@ const Home = () => {
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white rounded-lg p-6 w-11/12 max-h-[80%]">
+          <View className="bg-white rounded-lg p-6 w-11/12 max-h-[80%] relative">
+            <TouchableOpacity 
+              onPress={() => setModalVisible(false)}
+              className="absolute right-4 top-4 z-10"
+            >
+              <Text className="text-red-500 text-xl font-bold">✕</Text>
+            </TouchableOpacity>
+
             <ScrollView>
               <Text className="text-xl font-bold mb-4">{selectedParcel?.title}</Text>
               
@@ -184,7 +297,7 @@ const Home = () => {
               </ScrollView>
 
               <Text className="font-bold">Details:</Text>
-              <Text>Created by: {user?.name}</Text>
+              <Text>Created by: {selectedParcel?.senderID}</Text>
               <Text>Description: {selectedParcel?.description}</Text>
               <Text>Pickup: {selectedParcel?.src_full_address}</Text>
               <Text>Dropoff: {selectedParcel?.dest_full_address}</Text>
@@ -193,36 +306,60 @@ const Home = () => {
               <Text>
                 Delivered by: {selectedParcel?.deliverID ? selectedParcel.deliverID : 'Not assigned yet'}
               </Text>
-              <Text className="text-gray-500">
-                (Debug - Raw deliverID value: {JSON.stringify(selectedParcel?.deliverID)})
-              </Text>
               
               <View className="flex-row items-center mt-2">
                 <Text className="font-bold">Delivery Status: </Text>
-                <View className={`w-3 h-3 rounded-full ml-2 ${selectedParcel?.status === 'assigned' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                <View className={`w-3 h-3 rounded-full ml-2 ${
+                  selectedParcel?.status === 'delivered' 
+                    ? 'bg-blue-500'
+                    : selectedParcel?.status === 'assigned' 
+                      ? 'bg-green-500' 
+                      : 'bg-yellow-500'
+                }`} />
                 <Text className="ml-2">
-                  {selectedParcel?.status === 'assigned' ? 'Assigned' : 'Pending'}
+                  {selectedParcel?.status === 'delivered'
+                    ? 'Delivered'
+                    : selectedParcel?.status === 'assigned'
+                      ? 'Assigned'
+                      : 'Pending'
+                  }
                 </Text>
               </View>
               
-              {selectedParcel?.status === 'assigned' && (
-                <Text className="mt-1">Assigned to: {selectedParcel?.deliverName || 'Unknown Courier'}</Text>
-              )}
-              
-              <View className="flex-row space-x-2 mt-6">
-                <TouchableOpacity 
-                  onPress={() => setModalVisible(false)}
-                  className="flex-1 bg-gray-500 py-3 rounded-lg"
-                >
-                  <Text className="text-white text-center">Close</Text>
-                </TouchableOpacity>
+              <View className="mt-6 space-y-4">
+                {selectedParcel?.status !== PackageStatus.Delivered && (
+                  selectedParcel?.deliverID === user.$id ? (
+                    // Show only delivery-related buttons when user is the deliverer
+                    <>
+                      <TouchableOpacity 
+                        onPress={() => handleMarkDelivered(selectedParcel)}
+                        className="w-full py-3 rounded-lg bg-green-500"
+                      >
+                        <Text className="text-white text-center">Delivered</Text>
+                      </TouchableOpacity>
 
-                <TouchableOpacity 
-                  onPress={() => handleDelete(selectedParcel)}
-                  className="flex-1 bg-red-500 py-3 rounded-lg"
-                >
-                  <Text className="text-white text-center">Delete</Text>
-                </TouchableOpacity>
+                      <TouchableOpacity 
+                        onPress={() => handleCancelDelivery(selectedParcel)}
+                        className="w-full py-3 rounded-lg bg-red-500"
+                      >
+                        <Text className="text-white text-center">Cancel Delivery</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : selectedParcel?.senderID === user.$id && (
+                    // Show delete button only when user is the sender
+                    <TouchableOpacity 
+                      onPress={() => handleDelete(selectedParcel)}
+                      disabled={selectedParcel?.status === PackageStatus.InTransit}
+                      className={`w-full py-3 rounded-lg ${
+                        selectedParcel?.status === PackageStatus.InTransit
+                          ? 'bg-gray-300'
+                          : 'bg-red-500'
+                      }`}
+                    >
+                      <Text className="text-white text-center">Delete</Text>
+                    </TouchableOpacity>
+                  )
+                )}
               </View>
             </ScrollView>
           </View>
