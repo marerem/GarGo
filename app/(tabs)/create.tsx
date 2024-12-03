@@ -144,7 +144,7 @@ const Create = () => {
         parcal.setSourceLocation(
           pickupLocation.latitude,
           pickupLocation.longitude,
-          displayAddresses.pickup // Use the actual address now
+          displayAddresses.pickup
         );
       }
 
@@ -152,9 +152,12 @@ const Create = () => {
         parcal.setDestinationLocation(
           dropoffLocation.latitude,
           dropoffLocation.longitude,
-          displayAddresses.dropoff // Use the actual address now
+          displayAddresses.dropoff
         );
       }
+
+      // Explicitly set deliverID to null
+      parcal.deliverID = null;
 
       // Create package with images
       await parcal.create(user.$id, form.images);

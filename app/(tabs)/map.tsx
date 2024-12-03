@@ -53,7 +53,6 @@ function MapsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <MapView
-        provider={PROVIDER_GOOGLE}
         style={styles.map}
         region={{
           latitude: location ? location.latitude : 46.2044,

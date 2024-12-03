@@ -11,7 +11,6 @@ import EmptyState from "@/components/EmptyState";
 import { useAuthContext } from "@/context/AuthProvider";
 import Package, { PackageStatus } from "@/lib/backend/packages";
 import { Query } from "react-native-appwrite";
-
 import client from "@/lib/backend/client";
 
 const Home = () => {
@@ -24,12 +23,28 @@ const Home = () => {
 
   // Function to fetch all packages
   const fetchPackages = async () => {
-    const pkgs = await Package.getPackages([
-      Query.equal("status", PackageStatus.Pending),
-      Query.equal("senderID", user?.$id),
-      Query.orderDesc("$createdAt")
-    ]);
-    setPackages(pkgs);
+    if (!user?.$id) {
+      return;
+    }
+
+    try {
+      const pkgs = await Package.getPackages([
+        Query.limit(100)
+      ]);
+      
+      // Log the complete raw package object
+      pkgs.forEach(pkg => {
+        console.log('Complete Package Object:', JSON.stringify(pkg, null, 2));
+      });
+      
+      const userPackages = pkgs.filter(pkg => 
+        pkg.senderID === user.$id || pkg.deliverID === user.$id
+      );
+      setPackages(userPackages);
+      
+    } catch (error) {
+      console.error('Error fetching packages:', error);
+    }
   };
 
   // Initial fetch
@@ -83,6 +98,7 @@ const Home = () => {
         title={item.title}
         images={item.previewsUrls ? [item.previewsUrls[0].href] : []}
         creator={item.senderID}
+        deliver={item.deliverID}
         avatar={undefined}
         pickup={item.src_full_address}
         dropoff={item.dest_full_address}
@@ -174,6 +190,24 @@ const Home = () => {
               <Text>Dropoff: {selectedParcel?.dest_full_address}</Text>
               <Text>Volume: {selectedParcel?.volume}</Text>
               <Text>Weight: {selectedParcel?.weight}kg</Text>
+              <Text>
+                Delivered by: {selectedParcel?.deliverID ? selectedParcel.deliverID : 'Not assigned yet'}
+              </Text>
+              <Text className="text-gray-500">
+                (Debug - Raw deliverID value: {JSON.stringify(selectedParcel?.deliverID)})
+              </Text>
+              
+              <View className="flex-row items-center mt-2">
+                <Text className="font-bold">Delivery Status: </Text>
+                <View className={`w-3 h-3 rounded-full ml-2 ${selectedParcel?.status === 'assigned' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                <Text className="ml-2">
+                  {selectedParcel?.status === 'assigned' ? 'Assigned' : 'Pending'}
+                </Text>
+              </View>
+              
+              {selectedParcel?.status === 'assigned' && (
+                <Text className="mt-1">Assigned to: {selectedParcel?.deliverName || 'Unknown Courier'}</Text>
+              )}
               
               <View className="flex-row space-x-2 mt-6">
                 <TouchableOpacity 

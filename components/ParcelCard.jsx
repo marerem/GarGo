@@ -8,7 +8,7 @@ import {
 
 import { icons } from "../constants";
 
-const ParcelCard = ({ title, creator, avatar, images, pickup, dropoff, description, volume, weight, onPress }) => {
+const ParcelCard = ({ title, creator, avatar, images,deliver, pickup, dropoff, description, volume, weight, onPress }) => {
   return (
     <View className="flex flex-col items-center px-4 mb-14">
       <View className="flex flex-row gap-3 items-start">
