@@ -379,6 +379,7 @@ export default class Package {
             /* Set the other information */
             packages[i].id = result.documents[i].$id
             packages[i].senderID = result.documents[i].senderID
+            packages[i].deliverID = result.documents[i].deliverID
             packages[i].title = result.documents[i].title
             packages[i].description = result.documents[i].description
             packages[i].src_lang = result.documents[i].src_lang
@@ -391,7 +392,7 @@ export default class Package {
             packages[i].volume = result.documents[i].volume
             packages[i].status = result.documents[i].status
             packages[i].imagesIDs = result.documents[i].images_ids
-            packages[i].previewsUrls = []
+            packages[i].previewsUrls = []   
             for (let j = 0; j < packages[i].imagesIDs.length; j++) {
                 packages[i].previewsUrls.push(packages[i].getImagePreview(packages[i].imagesIDs[j]))
             }
