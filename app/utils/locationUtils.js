@@ -14,3 +14,5 @@ export async function getAddressFromCoordinates(latitude, longitude) {
     return "Error retrieving location";
   }
 }
+
+export default getAddressFromCoordinates;

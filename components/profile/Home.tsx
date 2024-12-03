@@ -1,14 +1,49 @@
-import React, { useContext } from 'react';
-import { Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Text, View, TouchableOpacity, ScrollView, Alert, Image, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Linking } from 'react-native';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker'; // Import the Image Picker
 
+import { useAuthContext } from "@/context/AuthProvider";
 /* Import custom modules */
 import Auth from "@/lib/backend/auth";
+import ProfilePicture from "@/lib/backend/ProfilePicture";
+import { DB_SETTINGS } from "@/constants/ProfilePicture";
+
+const appwriteConfig = {
+  endpoint: "https://cloud.appwrite.io/v1",
+  project: "6728e2c90039161a6de4",
+  platform: "com.jsm.cargo",
+};
+
 
 export default function Home() {
+
   const navigation = useNavigation();
+  const { user } = useAuthContext();
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const profile = user?.$id ? new ProfilePicture(user.$id) : null;
+  const [profilePictureExists, setProfilePictureExists] = useState(false); // Track if the user has a profile picture
+
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!profile) return;
+
+      try {
+        setLoading(true);
+        const previewUrl = await profile.getProfilePicturePreview();
+        setProfilePicture(previewUrl);
+      } catch (error) {
+        console.error("Error fetching profile picture:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfilePicture();
+  }, [user]);
+
 
   const logout = async () => {
     /* Implement the logout logic */
@@ -37,17 +72,113 @@ export default function Home() {
     });
   };
 
+
+  const handleImagePicker = async (fromCamera: boolean) => {
+    if (!profile) {
+      Alert.alert("Error", "User is not logged in.");
+      return;
+    }
+
+    try {
+      const permissionResult = fromCamera
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert("Permission Denied", "You need to grant permission to access this feature.");
+        return;
+      }
+
+      const result = fromCamera
+        ? await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+          })
+        : await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+          });
+
+      if (!result.canceled) {
+        console.log('Selected image:', result.assets[0]); // Debugging statement
+        const profile = new ProfilePicture(user.$id);
+        const uploadResult = await profile.uploadImage({ uri: result.assets[0].uri, type: 'image/jpeg', size: result.assets[0].fileSize || 0 });
+
+        const imageUrl = profile.previewUrl;
+        console.log('Uploaded profile picture URL:', imageUrl); // Debugging statement
+        setProfilePicture(imageUrl);
+        setProfilePictureExists(true);
+      }
+    } catch (error) {
+      console.error("Error selecting profile picture:", error.message);
+      Alert.alert("Error", "Failed to add a profile picture.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteProfilePicture = async () => {
+    if (!profile) {
+      Alert.alert("Error", "User is not logged in.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await profile.removeProfilePicture();
+      setProfilePicture(null);
+    } catch (error) {
+      console.error("Error deleting profile picture:", error.message);
+      Alert.alert("Error", "Failed to delete profile picture.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRetakeOrDelete = () => {
+    Alert.alert(
+      "Profile Picture",
+      "Do you want to retake your profile picture or delete it?",
+      [
+        { text: "Retake", onPress: () => handleImagePicker(true) },
+        { text: "Delete", onPress: handleDeleteProfilePicture },
+        { text: "Cancel", style: "cancel" },
+      ]
+    );
+  };
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#f0f0f0' }}>
       {/* Header with Profile Info */}
       <View style={{ backgroundColor: 'white', padding: 16, alignItems: 'center', marginBottom: 16 }}>
         {/* Profile image placeholder */}
         <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#ccc', marginBottom: 8, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: '#ffffff', fontSize: 24 }}>JK</Text>
+          {profilePicture ? (
+            <TouchableOpacity onPress={handleRetakeOrDelete}>
+              <Image source={{ uri: profilePicture }} style={{ width: '100%', height: '100%', borderRadius: 40 }} />
+            </TouchableOpacity>
+          ) : (
+            <Text style={{ color: '#ffffff', fontSize: 24 }}>
+              {user?.name
+                ? user.name
+                    .split(" ") // Split full name into words
+                    .map((n) => n[0]) // Get first letter of each word
+                    .join("") // Combine initials
+                : "NA"} {/* Fallback initials */}
+            </Text>
+          )}
         </View>
-        {/* Profile details */}
-        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Jiko Kolio</Text>
-        <Text style={{ color: '#888' }}>New User</Text>
+        {/* Display User Name */}
+        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
+          {user?.name || "Guest"} {/* Fallback to Guest */}
+        </Text>
+        {/* Display User Status */}
+        <Text style={{ color: '#888' }}>
+          {user?.status || "New User"} {/* Fallback to New User */}
+        </Text>
       </View>
 
       {/* Wallet Section */}
@@ -66,9 +197,12 @@ export default function Home() {
       {/* Profile Completion Section */}
       <View style={{ backgroundColor: '#f8d7da', padding: 16, borderRadius: 10, marginBottom: 16, marginHorizontal: 16 }}>
         <Text style={{ color: '#721c24', fontWeight: 'bold', marginBottom: 4 }}>Profile Picture</Text>
-        <Text>Complete your CarGoRelay account by adding a profile picture. It's easy, friendly, and secure, and it will show others who you are during your co-transporting journeys!</Text>
-        <TouchableOpacity>
-          <Text style={{ color: '#721c24', marginTop: 8 }}>Add my profile picture</Text>
+        <Text>Complete your CarGoRelay account by adding a profile picture. It's easy, friendly, and secure!</Text>
+        <TouchableOpacity onPress={() => handleImagePicker(false)}>
+          <Text style={{ color: '#721c24', marginTop: 8 }}>Upload from Gallery</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleImagePicker(true)}>
+          <Text style={{ color: '#721c24', marginTop: 8 }}>Take a Picture</Text>
         </TouchableOpacity>
       </View>
 

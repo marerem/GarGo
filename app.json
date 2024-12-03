@@ -14,14 +14,16 @@
     },
     "ios": {
       "supportsTablet": true,
-      "package": "com.jsm.cargo"
+      // "package": "com.jsm.cargo",
+      "newArchEnabled": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.jsm.cargo"
+      "package": "com.jsm.cargo",
+      "newArchEnabled": true
     },
     "web": {
       "bundler": "metro",

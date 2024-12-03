@@ -28,19 +28,17 @@ const RootLayout = () => {
   }, [fontsLoaded,error])
   if (!fontsLoaded && !error) return null;
 
-  /* Return the component template */
-  return (
-    <AuthProvider>
-      <NavigationContainer>
-        {/* NavigationContainer wraps the Stack */}
-        <Stack initialRouteName="index">
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </NavigationContainer>
-    </AuthProvider>
-  );
+/* Return the component template */
+return (
+  <AuthProvider>
+    {/* Remove NavigationContainer */}
+    <Stack initialRouteName="index">
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
+  </AuthProvider>
+);
 };
 
 export default RootLayout
