@@ -33,6 +33,41 @@ class Profile {
         );        
         return user;
     }
+
+    async set_name(email: string, first_name: string, last_name: string) {  
+        const DB = new Databases(client);
+        const user = await DB.listDocuments(
+            DB_SETTINGS.DB_ID,
+            DB_SETTINGS.USER_COLLECTION_ID,
+            [Query.equal("email", email)]
+        );        
+        await DB.updateDocument(
+            DB_SETTINGS.DB_ID,
+            DB_SETTINGS.USER_COLLECTION_ID,
+            user.documents[0].$id,
+            {
+                first_name: first_name,
+                last_name: last_name
+            }
+        );
+    }
+
+    async set_phone(email: string, phone: string) {
+        const DB = new Databases(client);
+        const user = await DB.listDocuments(
+            DB_SETTINGS.DB_ID,
+            DB_SETTINGS.USER_COLLECTION_ID,
+            [Query.equal("email", email)]
+        );        
+        await DB.updateDocument(
+            DB_SETTINGS.DB_ID,
+            DB_SETTINGS.USER_COLLECTION_ID,
+            user.documents[0].$id,
+            {
+                phone: phone
+            }
+        );
+    }
 }
 
 export default Profile;
