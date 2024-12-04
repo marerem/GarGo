@@ -371,8 +371,8 @@ const Create = () => {
           <MapView
             className="w-full h-80 rounded-lg"
             initialRegion={{
-              latitude: pickupLocation?.latitude || 0,
-              longitude: pickupLocation?.longitude || 0,
+              latitude: pickupLocation?.latitude || 46.2044,
+              longitude: pickupLocation?.longitude || 6.1432,
               latitudeDelta: 0.0922,
               longitudeDelta: 0.0421,
             }}
