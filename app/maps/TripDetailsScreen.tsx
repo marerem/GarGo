@@ -138,7 +138,7 @@ function TripDetailsScreen({  }) {
   // Handle continue button click
   const handleContinue = () => {
     //setDestination(localDestination); // Set the final destination
-    navigation.navigate('TravelTime'); // Navigate to the TravelTimeScreen
+    navigation.navigate('ChooseOption'); // Navigate to the TravelTimeScreen
   };
 
   return (

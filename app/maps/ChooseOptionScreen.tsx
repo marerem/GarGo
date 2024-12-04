@@ -171,9 +171,9 @@ function ChooseOptionScreen() {
         <Text style={styles.optionTitle}>Choose an option</Text>
 
         {/* Button to choose best options and navigate to package selection */}
-        <TouchableOpacity style={styles.bestOptionsButton} onPress={() => navigation.navigate('SelectPackage')}>
+        {/*<TouchableOpacity style={styles.bestOptionsButton} onPress={() => navigation.navigate('SelectPackage')}>
           <Text style={styles.bestOptionsButtonText}>Choose Best Options</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
 
         {/* Confirm Button */}
         <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>

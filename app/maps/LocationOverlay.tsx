@@ -83,12 +83,12 @@ function LocationOverlay({  }) {
       ) : null}
 
       {/* Saved Locations List */}
-      <View style={styles.savedLocations}>
+      {/*<View style={styles.savedLocations}>
         <LocationItem title="Geneva Airport" subtitle="Rte de l'Aéroport 21, Genève" />
         <LocationItem title="Saved places" icon="star" />
         <LocationItem title="Set location on map" icon="place"/>
         <LocationItem title="I don’t have a destination" icon="close" />
-      </View>
+      </View>*/}
 
     </View>
   );
