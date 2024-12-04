@@ -4,9 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /* Import the client */
 import client from "@/lib/backend/client";
+import Profile from "@/lib/backend/profile";
 
 /* Define the account object */
 const account = new Account(client);
+const profile = new Profile();
 
 /* Define and export the Auth class */
 export default class Auth {
@@ -26,17 +28,18 @@ export default class Auth {
             await AsyncStorage.removeItem("expire"); // Remove the information about the session expiration
             return null;
         } else {
-            return await account.get();
+            const account_info = await account.get();
+            const profile_info = await profile.getInfo(account_info.email);
+            return {...account_info, ...profile_info};
         }
     }
 
     /* Define the new user registration method */
     static async register(username: string, email: string, password: string) {
         await account.create(ID.unique(), email, password, username); // Create the user
-
         // TODO: Remove the next part and add the verification steps (e.g. email verification)
-
         await Auth.pswauth(email, password); // Log in the user
+        await profile.create(email, username); // Create the user profile
     }
 
     /* Define the logout method */
@@ -44,6 +47,8 @@ export default class Auth {
         await AsyncStorage.removeItem("expire"); // Remove the information about the session expiration
         await account.deleteSession("current"); // Delete the current session
     }
+
+    /* Define the password reset method */
     static async changePassword(currentPassword: string, newPassword: string) {
         try {
             // Retrieve the current user's email
@@ -59,7 +64,7 @@ export default class Auth {
             // Step 3: Log back in with the new password if required by your app
             const newSession = await account.createEmailPasswordSession(email, newPassword);
     
-        } catch (error) {
+        } catch (error: any) {
             // Log the actual error to understand what went wrong
             console.error("Error in changePassword:", error.response ? error.response : error.message);
     
