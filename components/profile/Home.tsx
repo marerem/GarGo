@@ -1,22 +1,60 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Linking } from 'react-native';
 import { router } from 'expo-router';
+import { useAuthContext } from '@/context/AuthProvider';
 
 /* Import custom modules */
 import Auth from "@/lib/backend/auth";
+import Profile from "@/lib/backend/profile";
 
 export default function Home() {
   const navigation = useNavigation();
+  const [profileName, setProfileName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  const user = useAuthContext();
+
+  const fetchProfileInfo = async () => {
+    try {
+      const userEmail = user.user.email; // Assuming this method exists in Auth module to get the current user email
+      const userInfo = await Profile.getInfo(userEmail);
+
+      if (userInfo.documents && userInfo.documents.length > 0) {
+        const user = userInfo.documents[0];
+        if (user.first_name !== null) {
+          setProfileName(`${user.first_name} ${user.last_name}`);
+          setPhoneNumber(`${user.phone}`);
+        } else {
+          setProfileName('New User');
+          setPhoneNumber('');
+        }
+      } else {
+        setProfileName('New User');
+        setPhoneNumber('');
+      }
+    } catch (error) {
+      console.error("Error fetching profile info:", error);
+      setProfileName('New User');
+      setPhoneNumber('');
+    }
+  };
+
+  // Fetch profile info when the screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfileInfo();
+    }, [])
+  );
 
   const logout = async () => {
     /* Implement the logout logic */
-    await Auth.logout()
+    await Auth.logout();
 
-    /* Redirect the user to the sign in page */
-    router.replace("/")
-  }
+    /* Redirect the user to the sign-in page */
+    router.replace("/");
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -24,7 +62,7 @@ export default function Home() {
       "Are you sure you want to log out?",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Log Out", onPress: () => {logout();}}
+        { text: "Log Out", onPress: () => { logout(); } }
       ]
     );
   };
@@ -43,11 +81,11 @@ export default function Home() {
       <View style={{ backgroundColor: 'white', padding: 16, alignItems: 'center', marginBottom: 16 }}>
         {/* Profile image placeholder */}
         <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#ccc', marginBottom: 8, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: '#ffffff', fontSize: 24 }}>JK</Text>
+          <Text style={{ color: '#ffffff', fontSize: 24 }}>{profileName.charAt(0)}</Text>
         </View>
         {/* Profile details */}
-        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Jiko Kolio</Text>
-        <Text style={{ color: '#888' }}>New User</Text>
+        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{profileName}</Text>
+        <Text style={{ color: '#888' }}>{phoneNumber}</Text>
       </View>
 
       {/* Wallet Section */}
@@ -77,25 +115,7 @@ export default function Home() {
         <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc' }} onPress={() => navigation.navigate('SettingsMenu')}>
           <Text style={{ fontSize: 18 }}>Settings</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-          <Text style={{ fontSize: 18 }}>My Listings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-          <Text style={{ fontSize: 18 }}>My Routes</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-          <Text style={{ fontSize: 18 }}>My Deliveries</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-          <Text style={{ fontSize: 18 }}>Messages</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc' }}onPress={() => navigation.navigate('Payments')}>
-          <Text style={{ fontSize: 18 }}>My Payments</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-          <Text style={{ fontSize: 18 }}>Help</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc' }} onPress={handleContactUs}>
+        <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 }} onPress={handleContactUs}>
           <Text style={{ fontSize: 18 }}>Contact Us</Text>
         </TouchableOpacity>
         <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 }} onPress={handleLogout}>

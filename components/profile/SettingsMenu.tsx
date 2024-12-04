@@ -16,7 +16,7 @@ export default function SettingsMenu() {
           <Text style={styles.optionText}>Personal Information</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        {/*<TouchableOpacity 
           style={styles.optionContainer} 
           onPress={() => navigation.navigate('MyDocuments')}
         >
@@ -28,7 +28,7 @@ export default function SettingsMenu() {
           onPress={() => navigation.navigate('BankingInformation')}
         >
           <Text style={styles.optionText}>Banking Information</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
 
         {/* Modify the Password button to navigate to ChangePassword */}
         <TouchableOpacity 
@@ -38,7 +38,7 @@ export default function SettingsMenu() {
           <Text style={styles.optionText}>Change Password</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        {/*<TouchableOpacity 
           style={styles.optionContainer} 
           onPress={() => navigation.navigate('Notifications')}
         >
@@ -57,7 +57,7 @@ export default function SettingsMenu() {
           onPress={() => navigation.navigate('PublicProfile')}
         >
           <Text style={styles.optionText}>See My Public Profile</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
 
       </View>
     </ScrollView>

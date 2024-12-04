@@ -5,6 +5,7 @@ import SettingsMenu from '../../components/profile/SettingsMenu';
 import Password from '../../components/profile/Password';
 // import Payments from '../../components/profile/Payments';
 import { NavigationContainer } from '@react-navigation/native';
+import PersonalInformation from '@/components/profile/PersonalInformation';
 
 const ProfileStack = createNativeStackNavigator();
 
@@ -28,6 +29,17 @@ export default function Profile() {
         listeners={({ navigation, route }) => {
           // Debugging output for navigating to Home
           console.log('Navigating to Home screen');
+        }}
+      />
+       <ProfileStack.Screen 
+        name="PersonalInformation" 
+        component={PersonalInformation} 
+        options={{ 
+          headerShown: false 
+        }} 
+        listeners={({ navigation, route }) => {
+          // Debugging output for navigating to Home
+          console.log('Navigating to PersonalInformation screen');
         }}
       />
       

@@ -24,7 +24,7 @@ class Profile {
 
     }
 
-    async getInfo(email: string) {
+    static async getInfo(email: string) {
         const DB = new Databases(client);
         const user = await DB.listDocuments(
             DB_SETTINGS.DB_ID,
@@ -34,13 +34,13 @@ class Profile {
         return user;
     }
 
-    async set_name(email: string, first_name: string, last_name: string) {  
+    static async set_name(email: string, first_name: string, last_name: string) {  
         const DB = new Databases(client);
         const user = await DB.listDocuments(
             DB_SETTINGS.DB_ID,
             DB_SETTINGS.USER_COLLECTION_ID,
             [Query.equal("email", email)]
-        );        
+        );
         await DB.updateDocument(
             DB_SETTINGS.DB_ID,
             DB_SETTINGS.USER_COLLECTION_ID,
@@ -52,7 +52,7 @@ class Profile {
         );
     }
 
-    async set_phone(email: string, phone: string) {
+    static async set_phone(email: string, phone: string) {
         const DB = new Databases(client);
         const user = await DB.listDocuments(
             DB_SETTINGS.DB_ID,
