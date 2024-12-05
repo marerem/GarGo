@@ -19,7 +19,7 @@ export default function Home() {
   const fetchProfileInfo = async () => {
     try {
       const userEmail = user.user.email; // Assuming this method exists in Auth module to get the current user email
-      const userInfo = await Profile.getInfo(userEmail);
+      const userInfo = await Profile.getInfoStatic(userEmail);
 
       if (userInfo.documents && userInfo.documents.length > 0) {
         const user = userInfo.documents[0];

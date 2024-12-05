@@ -24,7 +24,16 @@ class Profile {
 
     }
 
-    static async getInfo(email: string) {
+    async getInfo(email: string) {
+        const DB = new Databases(client);
+        const user = await DB.listDocuments(
+            DB_SETTINGS.DB_ID,
+            DB_SETTINGS.USER_COLLECTION_ID,
+            [Query.equal("email", email)]
+        );        
+        return user;
+    }
+    static async getInfoStatic(email: string) {
         const DB = new Databases(client);
         const user = await DB.listDocuments(
             DB_SETTINGS.DB_ID,
