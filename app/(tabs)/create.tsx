@@ -14,6 +14,7 @@ import {
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 import { icons } from "../../constants";
 import CustomButton from "@/components/CustomButton";
@@ -44,6 +45,20 @@ const Create = () => {
   const [showAddressInput, setShowAddressInput] = useState<'pickup' | 'dropoff' | null>(null);
   const [manualAddress, setManualAddress] = useState('');
 
+  const compressImage = async (uri: string) => {
+    try {
+      const manipResult = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1024 } }], // Resize to max width of 1024px
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      return manipResult;
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      return null;
+    }
+  };
+
   const openImagePicker = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -53,16 +68,24 @@ const Create = () => {
     });
 
     if (!result.canceled) {
-      // Convert images to the format expected by Package class
-      const formattedImages = result.assets.map(asset => ({
-        uri: asset.uri,
-        type: 'image/jpeg',
-        size: asset.fileSize || 0,
-      }));
+      // Compress each image before adding to form
+      const compressedImages = await Promise.all(
+        result.assets.map(async (asset) => {
+          const compressed = await compressImage(asset.uri);
+          return compressed ? {
+            uri: compressed.uri,
+            type: 'image/jpeg',
+            size: compressed.size || 0,
+          } : null;
+        })
+      );
 
+      // Filter out any failed compressions
+      const validImages = compressedImages.filter(img => img !== null);
+      
       setForm({
         ...form,
-        images: [...form.images, ...formattedImages],
+        images: [...form.images, ...validImages],
       });
     }
   };
@@ -82,17 +105,19 @@ const Create = () => {
     });
 
     if (!result.canceled) {
-      // Convert image to the format expected by Package class
-      const formattedImage = {
-        uri: result.assets[0].uri,
-        type: 'image/jpeg',
-        size: result.assets[0].fileSize || 0,
-      };
+      const compressed = await compressImage(result.assets[0].uri);
+      if (compressed) {
+        const formattedImage = {
+          uri: compressed.uri,
+          type: 'image/jpeg',
+          size: compressed.size || 0,
+        };
 
-      setForm({
-        ...form,
-        images: [...form.images, formattedImage],
-      });
+        setForm({
+          ...form,
+          images: [...form.images, formattedImage],
+        });
+      }
     }
   };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList, Image, RefreshControl, Text, View, Alert, TouchableOpacity, Modal, ScrollView } from "react-native";
-
+import { Databases, Query } from "react-native-appwrite";
 
 import { images } from "../../constants";
 import ParcelCard from "@/components/ParcelCard";
@@ -10,7 +10,6 @@ import Trending from "@/components/Trending";
 import EmptyState from "@/components/EmptyState";
 import { useAuthContext } from "@/context/AuthProvider";
 import Package, { PackageStatus } from "@/lib/backend/packages";
-import { Query } from "react-native-appwrite";
 import client from "@/lib/backend/client";
 
 const Home = () => {
@@ -20,6 +19,8 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedParcel, setSelectedParcel] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [senderName, setSenderName] = useState("");
+  const [senderPhone, setSenderPhone] = useState("");
 
   // Function to fetch all packages
   const fetchPackages = async () => {
@@ -176,14 +177,36 @@ const Home = () => {
     )
     .slice(0, 5);  // Take first 5 packages for trending
 
-  const handleParcelPress = (parcel) => {
+  const handleParcelPress = async (parcel) => {
     setSelectedParcel(parcel);
     setModalVisible(true);
+    const userDetails = await fetchUserName(parcel.senderID);
+    setSenderName(userDetails.name);
+    setSenderPhone(userDetails.phone);
   };
 
   // Add this helper function to determine if delete is allowed
   const isDeleteAllowed = (parcel) => {
     return parcel.senderID === user.$id && parcel.status !== PackageStatus.InTransit;
+  };
+
+  // Modify the fetchUserName function to also fetch phone
+  const fetchUserName = async (userId) => {
+    try {
+      const databases = new Databases(client);
+      const user = await databases.getDocument(
+        '672906a800238300cad3',    // your database ID
+        '673b9b9d003ac5d78762',    // your users collection ID
+        '675197ac003623ffd552'
+      );
+      return {
+        name: user.first_name + " " + user.last_name,
+        phone: user.phone || 'No phone number'
+      };
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      return { name: userId, phone: 'No phone number' }; // fallback
+    }
   };
 
   const renderParcelCard = ({ item }) => (
@@ -297,7 +320,9 @@ const Home = () => {
               </ScrollView>
 
               <Text className="font-bold">Details:</Text>
-              <Text>Created by: {selectedParcel?.senderID}</Text>
+              <Text>Created by: {senderName || selectedParcel?.senderID}</Text>
+              <Text>Phone: {senderPhone}</Text>
+              
               <Text>Description: {selectedParcel?.description}</Text>
               <Text>Pickup: {selectedParcel?.src_full_address}</Text>
               <Text>Dropoff: {selectedParcel?.dest_full_address}</Text>
