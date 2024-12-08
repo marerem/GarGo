@@ -77,6 +77,24 @@ class Profile {
             }
         );
     }
+    static async set_id(email: string, id: string) {
+        const DB = new Databases(client);
+        const user = await DB.listDocuments(
+            DB_SETTINGS.DB_ID,
+            DB_SETTINGS.USER_COLLECTION_ID,
+            [Query.equal("email", email)]
+        );        
+        console.log(id)
+        await DB.updateDocument(
+            DB_SETTINGS.DB_ID,
+            DB_SETTINGS.USER_COLLECTION_ID,
+            user.documents[0].$id,
+            {
+                userID: id
+            }
+        );
+    }
+
 }
 
 export default Profile;

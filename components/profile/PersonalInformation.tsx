@@ -18,6 +18,7 @@ export default function PersonalInformation() {
   
       await Profile.set_name(user.user.email, firstName, lastName);
       await Profile.set_phone(user.user.email, phoneNumber);
+      await Profile.set_id(user.user.email, user.user.$id);
   
       console.log('User information updated successfully:', user);
       navigation.navigate("Home");
