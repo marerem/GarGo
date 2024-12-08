@@ -21,6 +21,8 @@ const Home = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [senderName, setSenderName] = useState("");
   const [senderPhone, setSenderPhone] = useState("");
+  const [delivererName, setDelivererName] = useState("");
+  const [delivererPhone, setDelivererPhone] = useState("");
 
   // Function to fetch all packages
   const fetchPackages = async () => {
@@ -180,9 +182,19 @@ const Home = () => {
   const handleParcelPress = async (parcel) => {
     setSelectedParcel(parcel);
     setModalVisible(true);
-    const userDetails = await fetchUserName(parcel.senderID);
-    setSenderName(userDetails.name);
-    setSenderPhone(userDetails.phone);
+    const senderDetails = await fetchUserName(parcel.senderID);
+    setSenderName(senderDetails.name);
+    setSenderPhone(senderDetails.phone);
+
+    // Fetch deliverer details if deliverID exists
+    if (parcel.deliverID) {
+      const delivererDetails = await fetchUserName(parcel.deliverID);
+      setDelivererName(delivererDetails.name);
+      setDelivererPhone(delivererDetails.phone);
+    } else {
+      setDelivererName("");
+      setDelivererPhone("");
+    }
   };
 
   // Add this helper function to determine if delete is allowed
@@ -343,8 +355,9 @@ const Home = () => {
               <Text>Volume: {selectedParcel?.volume}</Text>
               <Text>Weight: {selectedParcel?.weight}kg</Text>
               <Text>
-                Delivered by: {selectedParcel?.deliverID ? selectedParcel.deliverID : 'Not assigned yet'}
+                Delivered by: {delivererName || 'Not assigned yet'}
               </Text>
+              {delivererName && <Text>Deliverer Phone: {delivererPhone}</Text>}
               
               <View className="flex-row items-center mt-2">
                 <Text className="font-bold">Delivery Status: </Text>
