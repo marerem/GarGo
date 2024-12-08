@@ -193,19 +193,33 @@ const Home = () => {
   // Modify the fetchUserName function to also fetch phone
   const fetchUserName = async (userId) => {
     try {
+      console.log('Fetching user details for ID:', userId);
       const databases = new Databases(client);
-      const user = await databases.getDocument(
+      
+      // First try to list documents with a query to find matching userID
+      const users = await databases.listDocuments(
         '672906a800238300cad3',    // your database ID
         '673b9b9d003ac5d78762',    // your users collection ID
-        '675197ac003623ffd552'
+        [
+          Query.equal('userID', userId)  // Assuming 'userID' is the field name in your users collection
+        ]
       );
-      return {
-        name: user.first_name + " " + user.last_name,
-        phone: user.phone || 'No phone number'
-      };
+
+      if (users.documents.length > 0) {
+        const user = users.documents[0];
+        return {
+          name: `${user.first_name} ${user.last_name}`,
+          phone: user.phone || 'No phone number'
+        };
+      }
+      
+      throw new Error('User not found');
     } catch (error) {
       console.error('Error fetching user details:', error);
-      return { name: userId, phone: 'No phone number' }; // fallback
+      return { 
+        name: 'Unknown User', 
+        phone: 'No phone number' 
+      };
     }
   };
 
