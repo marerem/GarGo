@@ -14,6 +14,9 @@ const profile = new Profile();
 export default class Auth {
     /* Define the authentication methods */
     static async pswauth(email: string, password: string) {
+        /* Delete the session if it exists */
+        await account.deleteSession("current");
+
         const session = await account.createEmailPasswordSession(email, password);  // Create the session    
 
         /* Save information about the session */
