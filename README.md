@@ -6,6 +6,14 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 1. Install dependencies
 
+
+https://github.com/user-attachments/assets/79c2f032-3696-48f3-872a-e65727164451
+
+https://github.com/user-attachments/assets/59d9dc56-a722-4b7e-a217-c2582dbc9e56
+
+
+
+
    ```bash
    npm install
    ```
